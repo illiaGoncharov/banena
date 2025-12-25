@@ -5,10 +5,18 @@ const nextConfig: NextConfig = {
   output: "export",
   basePath: "/banena",
   
-  // Разрешаем загрузку изображений с внешних источников
-  // Для static export используем unoptimized
   images: {
     unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "source.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
   },
 };
 
