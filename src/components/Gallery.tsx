@@ -140,12 +140,16 @@ export function Gallery({ images, onActiveChange }: GalleryProps) {
         />
       </div>
 
-      {/* Счётчик */}
+      {/* Счётчик и хинт — HL2 стиль */}
       <div 
-        className="absolute bottom-4 left-4 text-sm font-light tracking-wide"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6 text-xs tracking-widest uppercase"
         style={{ color: "var(--text-muted)" }}
       >
-        {currentIndex + 1}/{total}
+        <span className="opacity-40">←</span>
+        <span className="font-mono tabular-nums">
+          {String(currentIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+        </span>
+        <span className="opacity-40">→</span>
       </div>
 
       {/* Невидимые зоны клика слева/справа */}

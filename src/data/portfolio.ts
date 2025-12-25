@@ -30,34 +30,34 @@ export const categories: CategoryInfo[] = [
   { id: "bio", title: "Био" },
 ];
 
-// Placeholder изображения через Unsplash Source (надёжнее picsum)
-// Формат: https://source.unsplash.com/WIDTHxHEIGHT/?QUERY
+// Placeholder изображения через placehold.co (надёжный сервис)
+// Формат: https://placehold.co/WIDTHxHEIGHT/BGCOLOR/TEXTCOLOR
 export const images: PortfolioImage[] = [
-  // Репортаж
-  { id: "r1", src: "https://source.unsplash.com/800x600/?documentary,event", alt: "Репортаж 1", category: "reportage", width: 800, height: 600 },
-  { id: "r2", src: "https://source.unsplash.com/600x800/?street,people", alt: "Репортаж 2", category: "reportage", width: 600, height: 800 },
-  { id: "r3", src: "https://source.unsplash.com/800x533/?concert,crowd", alt: "Репортаж 3", category: "reportage", width: 800, height: 533 },
-  { id: "r4", src: "https://source.unsplash.com/800x600/?journalism,city", alt: "Репортаж 4", category: "reportage", width: 800, height: 600 },
-  { id: "r5", src: "https://source.unsplash.com/600x900/?protest,march", alt: "Репортаж 5", category: "reportage", width: 600, height: 900 },
-  { id: "r6", src: "https://source.unsplash.com/800x600/?festival,night", alt: "Репортаж 6", category: "reportage", width: 800, height: 600 },
+  // Репортаж — тёплые тона
+  { id: "r1", src: "https://placehold.co/800x600/1a1a1a/333333?text=R1", alt: "Репортаж 1", category: "reportage", width: 800, height: 600 },
+  { id: "r2", src: "https://placehold.co/600x800/1a1a1a/333333?text=R2", alt: "Репортаж 2", category: "reportage", width: 600, height: 800 },
+  { id: "r3", src: "https://placehold.co/800x533/1a1a1a/333333?text=R3", alt: "Репортаж 3", category: "reportage", width: 800, height: 533 },
+  { id: "r4", src: "https://placehold.co/800x600/1a1a1a/333333?text=R4", alt: "Репортаж 4", category: "reportage", width: 800, height: 600 },
+  { id: "r5", src: "https://placehold.co/600x900/1a1a1a/333333?text=R5", alt: "Репортаж 5", category: "reportage", width: 600, height: 900 },
+  { id: "r6", src: "https://placehold.co/800x600/1a1a1a/333333?text=R6", alt: "Репортаж 6", category: "reportage", width: 800, height: 600 },
   
-  // Предметная съёмка
-  { id: "p1", src: "https://source.unsplash.com/800x800/?product,minimal", alt: "Предмет 1", category: "product", width: 800, height: 800 },
-  { id: "p2", src: "https://source.unsplash.com/800x600/?object,studio", alt: "Предмет 2", category: "product", width: 800, height: 600 },
-  { id: "p3", src: "https://source.unsplash.com/600x800/?still-life,design", alt: "Предмет 3", category: "product", width: 600, height: 800 },
-  { id: "p4", src: "https://source.unsplash.com/800x800/?cosmetics,beauty", alt: "Предмет 4", category: "product", width: 800, height: 800 },
+  // Предметная съёмка — нейтральные
+  { id: "p1", src: "https://placehold.co/800x800/1a1a1a/333333?text=P1", alt: "Предмет 1", category: "product", width: 800, height: 800 },
+  { id: "p2", src: "https://placehold.co/800x600/1a1a1a/333333?text=P2", alt: "Предмет 2", category: "product", width: 800, height: 600 },
+  { id: "p3", src: "https://placehold.co/600x800/1a1a1a/333333?text=P3", alt: "Предмет 3", category: "product", width: 600, height: 800 },
+  { id: "p4", src: "https://placehold.co/800x800/1a1a1a/333333?text=P4", alt: "Предмет 4", category: "product", width: 800, height: 800 },
   
-  // Портрет
-  { id: "a1", src: "https://source.unsplash.com/600x900/?portrait,artistic", alt: "Портрет 1", category: "portrait", width: 600, height: 900 },
-  { id: "a2", src: "https://source.unsplash.com/800x600/?face,studio", alt: "Портрет 2", category: "portrait", width: 800, height: 600 },
-  { id: "a3", src: "https://source.unsplash.com/600x800/?model,fashion", alt: "Портрет 3", category: "portrait", width: 600, height: 800 },
-  { id: "a4", src: "https://source.unsplash.com/800x533/?headshot,professional", alt: "Портрет 4", category: "portrait", width: 800, height: 533 },
-  { id: "a5", src: "https://source.unsplash.com/600x900/?black-white,portrait", alt: "Портрет 5", category: "portrait", width: 600, height: 900 },
+  // Портрет — холодные
+  { id: "a1", src: "https://placehold.co/600x900/1a1a1a/333333?text=A1", alt: "Портрет 1", category: "portrait", width: 600, height: 900 },
+  { id: "a2", src: "https://placehold.co/800x600/1a1a1a/333333?text=A2", alt: "Портрет 2", category: "portrait", width: 800, height: 600 },
+  { id: "a3", src: "https://placehold.co/600x800/1a1a1a/333333?text=A3", alt: "Портрет 3", category: "portrait", width: 600, height: 800 },
+  { id: "a4", src: "https://placehold.co/800x533/1a1a1a/333333?text=A4", alt: "Портрет 4", category: "portrait", width: 800, height: 533 },
+  { id: "a5", src: "https://placehold.co/600x900/1a1a1a/333333?text=A5", alt: "Портрет 5", category: "portrait", width: 600, height: 900 },
   
-  // Видео (превьюшки)
-  { id: "v1", src: "https://source.unsplash.com/1280x720/?cinema,film", alt: "Видео 1", category: "video", width: 1280, height: 720 },
-  { id: "v2", src: "https://source.unsplash.com/1280x720/?video,production", alt: "Видео 2", category: "video", width: 1280, height: 720 },
-  { id: "v3", src: "https://source.unsplash.com/1280x720/?camera,movie", alt: "Видео 3", category: "video", width: 1280, height: 720 },
+  // Видео (превьюшки) — кинематографичные пропорции
+  { id: "v1", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V1", alt: "Видео 1", category: "video", width: 1280, height: 720 },
+  { id: "v2", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V2", alt: "Видео 2", category: "video", width: 1280, height: 720 },
+  { id: "v3", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V3", alt: "Видео 3", category: "video", width: 1280, height: 720 },
 ];
 
 // Получить изображения по категории
