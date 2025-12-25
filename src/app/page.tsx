@@ -13,6 +13,8 @@ export default function Home() {
   // Переключение категории
   const toggleCategory = useCallback((category: Category) => {
     setActiveCategory((prev) => (prev === category ? null : category));
+    // Сбрасываем состояние галереи при смене категории
+    setIsGalleryActive(false);
   }, []);
 
   // Получаем изображения для активной категории
