@@ -1,14 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Разрешаем загрузку изображений с внешних источников (picsum для демо)
+  // Для GitHub Pages — static export
+  output: "export",
+  basePath: "/banena",
+  
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-      },
-    ],
+    unoptimized: true,
   },
 };
 
 export default nextConfig;
+
