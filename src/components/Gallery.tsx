@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
 import type { PortfolioImage } from "@/data/portfolio";
 
 interface GalleryProps {
@@ -123,22 +122,21 @@ export function Gallery({ images, onActiveChange }: GalleryProps) {
         {/* Placeholder — мягкий серый фон пока грузится */}
         <div 
           className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ${
-            isImageLoaded ? "opacity-0" : "opacity-100"
+            isImageLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
           }`}
           style={{ backgroundColor: "var(--border)" }}
         />
         
-        <Image
+        {/* Используем обычный img — обходит ограничения next/image */}
+        <img
           key={imageKey}
           src={currentImage.src}
           alt={currentImage.alt}
-          width={currentImage.width}
-          height={currentImage.height}
           className={`max-w-full max-h-full w-auto h-auto object-contain gallery-image-enter ${
             isImageLoaded ? "gallery-image-loaded" : "gallery-image-loading"
           }`}
-          priority={currentIndex < 2}
           onLoad={handleImageLoad}
+          loading={currentIndex < 2 ? "eager" : "lazy"}
         />
       </div>
 
