@@ -109,11 +109,11 @@ export default function Home() {
         </nav>
       </main>
 
-      {/* Футер — фиксированный справа внизу */}
+      {/* Футер — фиксированный слева внизу (не на фотке) */}
       <footer 
-        className="fixed bottom-8 right-8 flex gap-8 text-sm transition-opacity duration-300"
+        className="fixed bottom-8 left-8 md:left-16 lg:left-20 flex gap-6 text-sm transition-opacity duration-300"
         style={{ 
-          opacity: isGalleryActive ? 0.1 : activeCategory ? 0.3 : 0.5
+          opacity: isGalleryActive ? 0.15 : activeCategory ? 0.4 : 0.5
         }}
       >
         <a 
