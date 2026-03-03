@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-// IBM Plex Sans — чистый, геометричный шрифт от IBM
-const ibmPlex = IBM_Plex_Sans({
+// IBM Plex Mono — моноширный из семейства IBM, editorial-стиль, есть кириллица
+const ibmPlex = IBM_Plex_Mono({
   subsets: ["latin", "cyrillic"],
   weight: ["300", "400", "500", "600"],
   display: "swap",

@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Gallery } from "@/components/Gallery";
-import { categories, getImagesByCategory, bioText, contacts, type Category } from "@/data/portfolio";
+import { categories, getImagesByCategory, bioSchool, bioBrands, contacts, type Category } from "@/data/portfolio";
 
 export default function Home() {
   // Какая категория сейчас выбрана (null = ничего)
@@ -61,11 +61,14 @@ export default function Home() {
         </div>
       )}
 
-      {/* Основной контент — меню поверх галереи */}
-      <main className="relative z-10 min-h-screen px-8 py-16 md:px-16 lg:px-20">
+      {/* Основной контент — меню поверх галереи.
+          pointer-events-none на main: элемент занимает всю ширину экрана и без этого
+          блокировал бы клики на правую часть (галерея). Интерактивность возвращена
+          дочерним элементам через pointer-events-auto. */}
+      <main className="relative z-10 min-h-screen px-8 py-16 md:px-16 lg:px-20 pointer-events-none">
         {/* Заголовок — крупный, жирнее чем меню */}
         <header 
-          className="mb-12 transition-opacity duration-300"
+          className="mb-12 transition-opacity duration-300 pointer-events-none"
           style={{ opacity: headerOpacity }}
         >
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight leading-tight">
@@ -86,23 +89,55 @@ export default function Home() {
                 {/* Пункт меню — font-light */}
                 <button
                   onClick={() => toggleCategory(category.id)}
-                  className="block w-full text-left py-1 transition-opacity duration-300 cursor-pointer"
+                  className="block w-full text-left py-0 transition-opacity duration-300 cursor-pointer pointer-events-auto"
                   style={{ opacity }}
                 >
-                  <span className="text-5xl md:text-6xl lg:text-7xl font-light">
+                  <span className="text-5xl md:text-6xl lg:text-7xl font-normal leading-none">
                     {category.title}
                   </span>
                 </button>
 
                 {/* Раскрытый контент для Bio */}
                 {isActive && category.id === "bio" && (
-                  <div 
-                    className="py-6 transition-opacity duration-300"
+                  <div
+                    className="py-6 transition-opacity duration-300 pointer-events-auto"
                     style={{ opacity: isGalleryActive ? 0.2 : 1 }}
                   >
-                    <p className="text-lg md:text-xl leading-relaxed whitespace-pre-line max-w-2xl text-neutral-700">
-                      {bioText}
-                    </p>
+                    <div className="text-base md:text-lg leading-relaxed max-w-xl text-neutral-600 space-y-3">
+                      <p>Сергей — фотограф из Москвы.</p>
+                      <p>
+                        Обучение:{" "}
+                        <a
+                          href={bioSchool.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-2 hover:text-neutral-900 transition-colors"
+                        >
+                          {bioSchool.name}
+                        </a>
+                        .
+                      </p>
+                      <p>
+                        Работал с:{" "}
+                        {bioBrands.map((brand, i) => (
+                          <span key={brand.name}>
+                            {brand.url ? (
+                              <a
+                                href={brand.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline underline-offset-2 hover:text-neutral-900 transition-colors"
+                              >
+                                {brand.name}
+                              </a>
+                            ) : (
+                              brand.name
+                            )}
+                            {i < bioBrands.length - 1 ? ", " : "."}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

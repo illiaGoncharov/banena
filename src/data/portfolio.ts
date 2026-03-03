@@ -72,13 +72,29 @@ export const contacts = {
   email: "banena@example.com",
 };
 
-// Текст для Bio (как у Петраковой — со ссылками, перечислением работ и людей)
-export const bioText = `Сергей — фотограф из Москвы. 
+// Школа / образование
+export const bioSchool = {
+  name: "Polezreniya",
+  url: "https://polezreniya.com/",
+};
 
-[СЮДА ДОБАВИТЬ: образование, курсы, мастер-классы — со ссылками]
+// Бренды для раздела Bio — name + url (null если нет сайта)
+export interface BioBrand {
+  name: string;
+  url: string | null;
+}
 
-Работал с [ИМЕНА КЛИЕНТОВ/БРЕНДОВ — со ссылками если есть].
-
-Съёмки публиковались в [ИЗДАНИЯ — со ссылками].
-
-Выставки: [СПИСОК ВЫСТАВОК — со ссылками на галереи].`;
+export const bioBrands: BioBrand[] = [
+  { name: "Street Beat",      url: "https://street-beat.ru/" },
+  { name: "Никола-Ленивец",   url: "https://nikola-lenivets.ru/" },
+  { name: "Крутояк",          url: "https://krutofestival.com/" },
+  { name: "Сила Ветра",       url: "https://silavetra.com/" },
+  { name: "Lupine",           url: null },
+  { name: "Cube",             url: "https://cube.moscow/" },
+  { name: "Яндекс",           url: null },
+  { name: "Art&Fact",         url: "https://www.art-fact-products.com" },
+  { name: "Абрау-Дюрсо",      url: "https://abraudurso-studio.ru/" },
+  { name: "Green Mama",       url: "https://mygreenmama.ru/" },
+  { name: "Жостово",          url: "https://zhostovo.ru/" },
+  { name: "Bitey",            url: "https://bite.ru/" },
+];
