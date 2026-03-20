@@ -71,10 +71,8 @@ export default function Home() {
           className="mb-12 transition-opacity duration-300 pointer-events-none"
           style={{ opacity: headerOpacity }}
         >
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-medium tracking-tight leading-tight">
-            BANENA, Фотограф,
-            <br />
-            Москва
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-tight">
+            Сергей Захаров
           </h1>
         </header>
 
@@ -92,7 +90,7 @@ export default function Home() {
                   className="block w-full text-left py-0 transition-opacity duration-300 cursor-pointer pointer-events-auto"
                   style={{ opacity }}
                 >
-                  <span className="text-5xl md:text-6xl lg:text-7xl font-normal leading-none">
+                  <span className="text-3xl md:text-4xl lg:text-5xl font-normal leading-none">
                     {category.title}
                   </span>
                 </button>

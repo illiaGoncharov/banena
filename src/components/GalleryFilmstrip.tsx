@@ -10,6 +10,7 @@ interface GalleryFilmstripProps {
   onIndexChange: (index: number) => void;
   onShowGrid: () => void;
   onActiveChange?: (isActive: boolean) => void;
+  isActive: boolean;
 }
 
 export function GalleryFilmstrip({
@@ -18,6 +19,7 @@ export function GalleryFilmstrip({
   onIndexChange,
   onShowGrid,
   onActiveChange,
+  isActive,
 }: GalleryFilmstripProps) {
   const total = images.length;
   const [loadedIndices, setLoadedIndices] = useState<Set<number>>(new Set());
@@ -49,15 +51,16 @@ export function GalleryFilmstrip({
     notifyActive();
   }, [currentIndex, total, onIndexChange, notifyActive]);
 
-  // Клавиши ← →
+  // Клавиши ← → только когда filmstrip активен (не в режиме grid)
   useEffect(() => {
+    if (!isActive) return;
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowRight") goNext();
       else if (e.key === "ArrowLeft") goPrev();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [goNext, goPrev]);
+  }, [goNext, goPrev, isActive]);
 
   // Предзагрузка соседних кадров
   useEffect(() => {
