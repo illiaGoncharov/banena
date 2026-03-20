@@ -50,7 +50,7 @@ export function GalleryGrid({ images, onSelectImage, onClose }: GalleryGridProps
                 src={assetPath(img.src)}
                 alt={img.alt}
                 className="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-70"
-                loading="lazy"
+                loading={i < 15 ? "eager" : "lazy"}
               />
             </button>
           ))}
