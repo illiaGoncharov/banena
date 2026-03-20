@@ -44,9 +44,9 @@ export function getImagesByCategory(category: Category): PortfolioImage[] {
 
 // Контактные данные
 export const contacts = {
-  telegram: "https://t.me/banena",
-  instagram: "https://instagram.com/banenaphotography",
-  email: "banena@example.com",
+  telegram: "https://t.me/banena1337A",
+  instagram: "https://www.instagram.com/banena1337o?igsh=MWQ0anVwNXJnN2ZndQ==",
+  email: "banena1337O@yandex.ru",
 };
 
 // Школа / образование
