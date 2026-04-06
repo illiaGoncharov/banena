@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import type { PortfolioImage } from "@/data/portfolio";
 import { assetPath } from "@/lib/assetPath";
+import { useSwipe } from "@/lib/useSwipe";
 
 interface GalleryFilmstripProps {
   images: PortfolioImage[];
@@ -11,6 +12,7 @@ interface GalleryFilmstripProps {
   onShowGrid: () => void;
   onActiveChange?: (isActive: boolean) => void;
   isActive: boolean;
+  onOpenLightbox?: () => void;
 }
 
 export function GalleryFilmstrip({
@@ -20,6 +22,7 @@ export function GalleryFilmstrip({
   onShowGrid,
   onActiveChange,
   isActive,
+  onOpenLightbox,
 }: GalleryFilmstripProps) {
   const total = images.length;
   const [loadedIndices, setLoadedIndices] = useState<Set<number>>(new Set());
@@ -50,6 +53,11 @@ export function GalleryFilmstrip({
     onIndexChange((currentIndex - 1 + total) % total);
     notifyActive();
   }, [currentIndex, total, onIndexChange, notifyActive]);
+
+  const swipeRef = useSwipe<HTMLDivElement>({
+    onSwipeLeft: goNext,
+    onSwipeRight: goPrev,
+  });
 
   // Клавиши ← → только когда filmstrip активен (не в режиме grid)
   useEffect(() => {
@@ -90,13 +98,9 @@ export function GalleryFilmstrip({
   const prevIdx = (currentIndex - 1 + total) % total;
   const nextIdx = (currentIndex + 1) % total;
 
-  // Ширина текущего слайда — 70% контейнера.
-  // Оставшиеся 15% с каждой стороны — peek-зона для соседних фото.
-  // Соседние фото позиционируются абсолютно, выходя за эти 15% —
-  // маска (filmstrip-mask) плавно растворяет их к краям.
-  const SLIDE_W = 70;   // % от ширины контейнера
-  const CENTER_L = (100 - SLIDE_W) / 2; // 15% — отступ слева для центрирования
-  const GAP = 20;       // px — зазор между слайдами
+  const SLIDE_W = 70;
+  const CENTER_L = (100 - SLIDE_W) / 2;
+  const GAP = 20;
 
   const slidePositions = {
     prev: { left: `calc(${CENTER_L}% - ${SLIDE_W}% - ${GAP}px)` },
@@ -112,8 +116,9 @@ export function GalleryFilmstrip({
 
   return (
     <div className="relative w-full h-full flex flex-col">
-      {/* Область filmstrip */}
+      {/* Область filmstrip — свайпы здесь */}
       <div
+        ref={swipeRef}
         className="relative flex-1 overflow-hidden filmstrip-mask"
         style={{ minHeight: 0 }}
       >
@@ -134,7 +139,6 @@ export function GalleryFilmstrip({
                 padding: "0 8px",
               }}
             >
-              {/* Placeholder пока грузится */}
               {!isLoaded && (
                 <div
                   className="absolute inset-2"
@@ -159,12 +163,18 @@ export function GalleryFilmstrip({
         {/* Зоны клика: левая половина → назад, правая → вперёд */}
         <button
           onClick={goPrev}
-          className="absolute left-0 top-0 bottom-0 w-1/2 cursor-w-resize z-10"
+          className="absolute left-0 top-0 bottom-0 w-1/4 cursor-w-resize z-10"
           aria-label="Предыдущее фото"
+        />
+        {/* Центральная зона — клик по текущему фото → lightbox */}
+        <button
+          onClick={onOpenLightbox}
+          className="absolute left-1/4 top-0 bottom-0 w-1/2 cursor-zoom-in z-10"
+          aria-label="Открыть фото крупно"
         />
         <button
           onClick={goNext}
-          className="absolute right-0 top-0 bottom-0 w-1/2 cursor-e-resize z-10"
+          className="absolute right-0 top-0 bottom-0 w-1/4 cursor-e-resize z-10"
           aria-label="Следующее фото"
         />
       </div>

@@ -6,93 +6,79 @@ import { VideoGallery } from "@/components/VideoGallery";
 import { categories, getImagesByCategory, videos, bioSchool, bioBrands, contacts, type Category } from "@/data/portfolio";
 
 export default function Home() {
-  // Какая категория сейчас выбрана (null = ничего)
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
-  // Галерея активна (пользователь листает фото)
   const [isGalleryActive, setIsGalleryActive] = useState(false);
 
-  // Переключение категории
   const toggleCategory = useCallback((category: Category) => {
     setActiveCategory((prev) => (prev === category ? null : category));
-    // Сбрасываем состояние галереи при смене категории
     setIsGalleryActive(false);
   }, []);
 
-  // Получаем изображения для активной категории
   const activeImages = activeCategory ? getImagesByCategory(activeCategory) : [];
 
-  // Прозрачность пунктов меню (как на референсе):
-  // - Изначально все пункты очень бледные (0.15), только заголовок яркий
-  // - При выборе категории — активный пункт ярко-чёрный
-  // - При листании галереи — всё уходит в туман
   const getMenuItemOpacity = (categoryId: Category): number => {
     if (isGalleryActive) {
-      // Когда листаем галерею — всё очень бледное
       return activeCategory === categoryId ? 0.25 : 0.08;
     }
     if (activeCategory) {
-      // Активная категория — яркая, остальные почти невидимы
       return activeCategory === categoryId ? 1 : 0.15;
     }
-    // Изначально — меню бледное, как на референсе
     return 0.15;
   };
 
-  // Прозрачность заголовка — изначально яркий, при выборе категории сильно бледнеет
   const headerOpacity = isGalleryActive ? 0.08 : activeCategory ? 0.15 : 1;
+
+  const showPhotoGallery = activeCategory && activeCategory !== "bio" && activeCategory !== "video" && activeImages.length > 0;
+  const showVideoGallery = activeCategory === "video";
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden font-sans">
-      {/* Галерея фото — позади меню, занимает правую часть экрана */}
-      {activeCategory && activeCategory !== "bio" && activeCategory !== "video" && activeImages.length > 0 && (
-        <div 
-          className="fixed inset-0 z-0 flex items-center justify-end"
-          style={{ 
+      {/* ===== DESKTOP: галерея фиксирована справа ===== */}
+      {showPhotoGallery && (
+        <div
+          className="hidden md:flex fixed inset-0 z-0 items-center justify-end"
+          style={{
             paddingLeft: "42%",
             paddingRight: "32px",
             paddingTop: "32px",
-            paddingBottom: "32px"
+            paddingBottom: "32px",
           }}
         >
-          <Gallery 
-            key={activeCategory}
-            images={activeImages} 
+          <Gallery
+            key={`desktop-${activeCategory}`}
+            images={activeImages}
             onActiveChange={setIsGalleryActive}
           />
         </div>
       )}
 
-      {/* Видеогалерея — аналогичная позиция, но показывает YouTube-превью */}
-      {activeCategory === "video" && (
-        <div 
-          className="fixed inset-0 z-0 flex items-center justify-end"
-          style={{ 
+      {showVideoGallery && (
+        <div
+          className="hidden md:flex fixed inset-0 z-0 items-center justify-end"
+          style={{
             paddingLeft: "42%",
             paddingRight: "32px",
             paddingTop: "32px",
-            paddingBottom: "32px"
+            paddingBottom: "32px",
           }}
         >
           <VideoGallery videos={videos} />
         </div>
       )}
 
-      {/* Основной контент — меню поверх галереи.
-          pointer-events-none на main: элемент занимает всю ширину экрана и без этого
-          блокировал бы клики на правую часть (галерея). Интерактивность возвращена
-          дочерним элементам через pointer-events-auto. */}
-      <main className="relative z-10 min-h-screen px-8 py-16 md:px-16 lg:px-20 pointer-events-none">
-        {/* Заголовок — крупный, жирнее чем меню */}
-        <header 
-          className="mb-12 transition-opacity duration-300 pointer-events-none"
+      {/* ===== ОСНОВНОЙ КОНТЕНТ =====
+          Desktop: pointer-events-none чтобы не блокировать клики по галерее справа.
+          Mobile: нормальный поток, pointer-events включены. */}
+      <main className="relative z-10 min-h-screen px-5 py-10 md:px-16 lg:px-20 md:py-16 md:pointer-events-none">
+        <header
+          className="mb-8 md:mb-12 transition-opacity duration-300 pointer-events-none"
           style={{ opacity: headerOpacity }}
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-tight">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-medium tracking-tight leading-tight">
             Сергей Захаров
           </h1>
         </header>
 
-        {/* Навигация — тонкий шрифт (light) */}
         <nav className="space-y-0">
           {categories.map((category) => {
             const isActive = activeCategory === category.id;
@@ -100,18 +86,16 @@ export default function Home() {
 
             return (
               <div key={category.id}>
-                {/* Пункт меню — font-light */}
                 <button
                   onClick={() => toggleCategory(category.id)}
                   className="block w-full text-left py-0 transition-opacity duration-300 cursor-pointer pointer-events-auto"
                   style={{ opacity }}
                 >
-                  <span className="text-3xl md:text-4xl lg:text-5xl font-normal leading-none">
+                  <span className="text-2xl md:text-4xl lg:text-5xl font-normal leading-none">
                     {category.title}
                   </span>
                 </button>
 
-                {/* Раскрытый контент для Bio */}
                 {isActive && category.id === "bio" && (
                   <div
                     className="py-6 transition-opacity duration-300 pointer-events-auto"
@@ -158,16 +142,33 @@ export default function Home() {
             );
           })}
         </nav>
+
+        {/* ===== MOBILE: галерея inline под меню ===== */}
+        {showPhotoGallery && (
+          <div className="md:hidden mt-6 w-full" style={{ height: "60vh" }}>
+            <Gallery
+              key={`mobile-${activeCategory}`}
+              images={activeImages}
+              onActiveChange={setIsGalleryActive}
+            />
+          </div>
+        )}
+
+        {showVideoGallery && (
+          <div className="md:hidden mt-6 w-full" style={{ height: "60vh" }}>
+            <VideoGallery videos={videos} />
+          </div>
+        )}
       </main>
 
-      {/* Футер — фиксированный слева внизу (не на фотке) */}
-      <footer 
-        className="fixed bottom-8 left-8 md:left-16 lg:left-20 flex gap-6 text-sm transition-opacity duration-300"
-        style={{ 
-          opacity: isGalleryActive ? 0.15 : activeCategory ? 0.4 : 0.5
+      {/* Футер — фиксированный слева внизу */}
+      <footer
+        className="fixed bottom-6 left-5 md:bottom-8 md:left-16 lg:left-20 flex gap-6 text-sm transition-opacity duration-300"
+        style={{
+          opacity: isGalleryActive ? 0.15 : activeCategory ? 0.4 : 0.5,
         }}
       >
-        <a 
+        <a
           href={contacts.telegram}
           target="_blank"
           rel="noopener noreferrer"
@@ -175,7 +176,7 @@ export default function Home() {
         >
           TG
         </a>
-        <a 
+        <a
           href={contacts.instagram}
           target="_blank"
           rel="noopener noreferrer"

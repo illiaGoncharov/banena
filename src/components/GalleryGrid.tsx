@@ -34,10 +34,7 @@ export function GalleryGrid({ images, onSelectImage, onClose }: GalleryGridProps
         className="flex-1 overflow-y-auto"
         style={{ minHeight: 0 }}
       >
-        <div
-          className="grid gap-1"
-          style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-        >
+        <div className="grid gap-1 grid-cols-2 md:grid-cols-3">
           {images.map((img, i) => (
             <button
               key={img.id}

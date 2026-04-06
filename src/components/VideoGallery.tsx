@@ -1,7 +1,47 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { PortfolioVideo } from "@/data/portfolio";
+
+interface BentoItem {
+  video: PortfolioVideo;
+  span: 1 | 2;
+}
+
+/**
+ * Раскладывает видео для bento-сетки без пустот:
+ * горизонтальные — span 2, Shorts — парами span 1.
+ * Если один Short «лишний» (нечётное число), он тоже получает span 2.
+ */
+function buildBentoLayout(videos: PortfolioVideo[]): BentoItem[] {
+  const shorts = videos.filter((v) => v.isShort);
+  const landscape = videos.filter((v) => !v.isShort);
+
+  const items: BentoItem[] = [];
+  let si = 0;
+  let li = 0;
+
+  while (si < shorts.length || li < landscape.length) {
+    // Если есть пара Shorts — ставим их рядом
+    if (si + 1 < shorts.length) {
+      items.push({ video: shorts[si], span: 1 });
+      items.push({ video: shorts[si + 1], span: 1 });
+      si += 2;
+    }
+    // Горизонтальное видео — на всю ширину
+    if (li < landscape.length) {
+      items.push({ video: landscape[li], span: 2 });
+      li++;
+    }
+    // Одинокий Short — растягиваем на всю ширину, обрежется через object-cover
+    if (si < shorts.length && si + 1 >= shorts.length) {
+      items.push({ video: shorts[si], span: 2 });
+      si++;
+    }
+  }
+
+  return items;
+}
 
 interface VideoGalleryProps {
   videos: PortfolioVideo[];
@@ -9,6 +49,7 @@ interface VideoGalleryProps {
 
 export function VideoGallery({ videos }: VideoGalleryProps) {
   const [activeVideo, setActiveVideo] = useState<PortfolioVideo | null>(null);
+  const layout = useMemo(() => buildBentoLayout(videos), [videos]);
 
   // Закрываем по Escape
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -24,15 +65,18 @@ export function VideoGallery({ videos }: VideoGalleryProps) {
 
   return (
     <>
-      {/* Сетка превью — скроллируется внутри правой панели */}
+      {/* Bento-сетка: горизонтальные на всю ширину, Shorts парами */}
       <div className="w-full h-full overflow-y-auto">
         <div className="grid grid-cols-2 gap-2 p-1">
-          {videos.map((video) => (
+          {layout.map(({ video, span }) => (
             <button
               key={video.id}
               onClick={() => setActiveVideo(video)}
               className="relative group overflow-hidden rounded-sm bg-neutral-100"
-              style={{ aspectRatio: video.isShort ? "9/16" : "16/9" }}
+              style={{
+                aspectRatio: span === 2 ? "16/9" : "9/16",
+                gridColumn: `span ${span}`,
+              }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { PortfolioImage } from "@/data/portfolio";
 import { GalleryFilmstrip } from "./GalleryFilmstrip";
 import { GalleryGrid } from "./GalleryGrid";
+import { Lightbox } from "./Lightbox";
 
 type GalleryMode = "filmstrip" | "grid";
 
@@ -15,21 +16,44 @@ interface GalleryProps {
 export function Gallery({ images, onActiveChange }: GalleryProps) {
   const [mode, setMode] = useState<GalleryMode>("filmstrip");
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     setCurrentIndex(0);
-    setMode("filmstrip");
-  }, [images]);
+    setMode(isMobile ? "grid" : "filmstrip");
+  }, [images, isMobile]);
 
-  const handleSelectFromGrid = (index: number) => {
-    setCurrentIndex(index);
-    setMode("filmstrip");
-  };
+  const handleSelectFromGrid = useCallback((index: number) => {
+    if (isMobile) {
+      setLightboxIndex(index);
+    } else {
+      setCurrentIndex(index);
+      setMode("filmstrip");
+    }
+  }, [isMobile]);
+
+  const handleOpenLightbox = useCallback(() => {
+    setLightboxIndex(currentIndex);
+  }, [currentIndex]);
+
+  const closeLightbox = useCallback(() => {
+    if (lightboxIndex !== null) {
+      setCurrentIndex(lightboxIndex);
+    }
+    setLightboxIndex(null);
+  }, [lightboxIndex]);
 
   if (images.length === 0) return null;
 
-  // Оба компонента всегда в DOM — сетка сохраняет скролл-позицию.
-  // Переключаем видимость через CSS.
   return (
     <div className="relative w-full h-full gallery-container">
       <div className={mode === "filmstrip" ? "w-full h-full" : "hidden"}>
@@ -40,6 +64,7 @@ export function Gallery({ images, onActiveChange }: GalleryProps) {
           onShowGrid={() => setMode("grid")}
           onActiveChange={onActiveChange}
           isActive={mode === "filmstrip"}
+          onOpenLightbox={handleOpenLightbox}
         />
       </div>
       <div className={mode === "grid" ? "w-full h-full" : "hidden"}>
@@ -49,6 +74,15 @@ export function Gallery({ images, onActiveChange }: GalleryProps) {
           onClose={() => setMode("filmstrip")}
         />
       </div>
+
+      {lightboxIndex !== null && (
+        <Lightbox
+          images={images}
+          currentIndex={lightboxIndex}
+          onIndexChange={setLightboxIndex}
+          onClose={closeLightbox}
+        />
+      )}
     </div>
   );
 }
