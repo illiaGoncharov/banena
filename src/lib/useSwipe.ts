@@ -14,8 +14,8 @@ interface UseSwipeOptions {
  */
 export function useSwipe<T extends HTMLElement = HTMLDivElement>(
   options: UseSwipeOptions
-): RefObject<T | null> {
-  const ref = useRef<T | null>(null);
+): RefObject<T> {
+  const ref = useRef<T>(null) as RefObject<T>;
   const startX = useRef(0);
   const startY = useRef(0);
 
