@@ -1,8 +1,8 @@
-import type { Category, CategoryInfo, PortfolioImage, BioBrand } from "./portfolioTypes";
+import type { Category, CategoryInfo, PortfolioImage, PortfolioVideo, BioBrand } from "./portfolioTypes";
 import { reportageImages } from "./reportage.generated";
 
 // Реэкспорт типов — импорты из @/data/portfolio в компонентах не ломаются
-export type { Category, CategoryInfo, PortfolioImage, BioBrand } from "./portfolioTypes";
+export type { Category, CategoryInfo, PortfolioImage, PortfolioVideo, BioBrand } from "./portfolioTypes";
 
 // Категории для меню
 export const categories: CategoryInfo[] = [
@@ -29,10 +29,6 @@ const placeholderImages: PortfolioImage[] = [
   { id: "a4", src: "https://placehold.co/800x533/1a1a1a/333333?text=A4", alt: "Портрет 4", category: "portrait", width: 800, height: 533 },
   { id: "a5", src: "https://placehold.co/600x900/1a1a1a/333333?text=A5", alt: "Портрет 5", category: "portrait", width: 600, height: 900 },
 
-  // Видео (превью)
-  { id: "v1", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V1", alt: "Видео 1", category: "video", width: 1280, height: 720 },
-  { id: "v2", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V2", alt: "Видео 2", category: "video", width: 1280, height: 720 },
-  { id: "v3", src: "https://placehold.co/1280x720/1a1a1a/333333?text=V3", alt: "Видео 3", category: "video", width: 1280, height: 720 },
 ];
 
 export const images: PortfolioImage[] = [...reportageImages, ...placeholderImages];
@@ -41,6 +37,20 @@ export const images: PortfolioImage[] = [...reportageImages, ...placeholderImage
 export function getImagesByCategory(category: Category): PortfolioImage[] {
   return images.filter((img) => img.category === category);
 }
+
+// Видео с YouTube
+export const videos: PortfolioVideo[] = [
+  { id: "v1",  youtubeId: "KzrLv4ngqAY", title: "", category: "video", isShort: true  },
+  { id: "v2",  youtubeId: "Pgml26nML5Q", title: "", category: "video", isShort: true  },
+  { id: "v3",  youtubeId: "rin-Bjqh3po", title: "", category: "video", isShort: true  },
+  { id: "v4",  youtubeId: "f_bb_ZveN2g", title: "", category: "video", isShort: false },
+  { id: "v5",  youtubeId: "6IC-ydKJ7ZU", title: "", category: "video", isShort: false },
+  { id: "v6",  youtubeId: "DRqBDFOu9JY", title: "", category: "video", isShort: true  },
+  { id: "v7",  youtubeId: "OqBLlbtyCzs", title: "", category: "video", isShort: true  },
+  { id: "v8",  youtubeId: "u-vocMfJQTM", title: "", category: "video", isShort: true  },
+  { id: "v9",  youtubeId: "QWwF1Wr1MkE", title: "", category: "video", isShort: true  },
+  { id: "v10", youtubeId: "CxsAJR4sQUE", title: "", category: "video", isShort: false },
+];
 
 // Контактные данные
 export const contacts = {

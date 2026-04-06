@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { Gallery } from "@/components/Gallery";
-import { categories, getImagesByCategory, bioSchool, bioBrands, contacts, type Category } from "@/data/portfolio";
+import { VideoGallery } from "@/components/VideoGallery";
+import { categories, getImagesByCategory, videos, bioSchool, bioBrands, contacts, type Category } from "@/data/portfolio";
 
 export default function Home() {
   // Какая категория сейчас выбрана (null = ничего)
@@ -42,8 +43,8 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden font-sans">
-      {/* Галерея — позади меню, занимает правую часть экрана */}
-      {activeCategory && activeCategory !== "bio" && activeImages.length > 0 && (
+      {/* Галерея фото — позади меню, занимает правую часть экрана */}
+      {activeCategory && activeCategory !== "bio" && activeCategory !== "video" && activeImages.length > 0 && (
         <div 
           className="fixed inset-0 z-0 flex items-center justify-end"
           style={{ 
@@ -54,10 +55,25 @@ export default function Home() {
           }}
         >
           <Gallery 
-            key={activeCategory} // Перемонтируем при смене категории для анимации
+            key={activeCategory}
             images={activeImages} 
             onActiveChange={setIsGalleryActive}
           />
+        </div>
+      )}
+
+      {/* Видеогалерея — аналогичная позиция, но показывает YouTube-превью */}
+      {activeCategory === "video" && (
+        <div 
+          className="fixed inset-0 z-0 flex items-center justify-end"
+          style={{ 
+            paddingLeft: "42%",
+            paddingRight: "32px",
+            paddingTop: "32px",
+            paddingBottom: "32px"
+          }}
+        >
+          <VideoGallery videos={videos} />
         </div>
       )}
 
@@ -166,6 +182,12 @@ export default function Home() {
           className="hover:opacity-100 transition-opacity text-neutral-500"
         >
           INST
+        </a>
+        <a
+          href={`mailto:${contacts.email}`}
+          className="hover:opacity-100 transition-opacity text-neutral-500"
+        >
+          MAIL
         </a>
       </footer>
     </div>

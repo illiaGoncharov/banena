@@ -26,3 +26,11 @@ export interface BioBrand {
   name: string;
   url: string | null;
 }
+
+export interface PortfolioVideo {
+  id: string;
+  youtubeId: string;
+  title: string;
+  category: Category;
+  isShort: boolean;
+}
