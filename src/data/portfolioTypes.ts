@@ -13,11 +13,25 @@ export interface CategoryInfo {
   subtitle?: string;
 }
 
+export interface SectionInfo {
+  id: string;
+  title: string;
+  category: Category;
+}
+
+export interface ProjectInfo {
+  id: string;
+  title: string;
+  section: string;
+  category: Category;
+}
+
 export interface PortfolioImage {
   id: string;
   src: string;
   alt: string;
   category: Category;
+  project: string;
   width: number;
   height: number;
 }
