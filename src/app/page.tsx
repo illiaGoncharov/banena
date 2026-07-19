@@ -3,18 +3,67 @@
 import { useState, useCallback } from "react";
 import { Gallery } from "@/components/Gallery";
 import { VideoGallery } from "@/components/VideoGallery";
-import { categories, getImagesByCategory, videos, bioSchool, bioBrands, contacts, type Category } from "@/data/portfolio";
+import {
+  categories,
+  getImagesByCategory,
+  getSectionsByCategory,
+  getProjectsBySection,
+  getImagesByProject,
+  videos,
+  bioSchool,
+  bioBrands,
+  contacts,
+  type Category,
+} from "@/data/portfolio";
+
+// Спец-значение activeProject: показать все фото жанра без разбивки
+const ALL_PROJECTS = "__all__";
 
 export default function Home() {
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
+  // Раскрытая секция (2-й уровень) и выбранный проект (3-й уровень)
+  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeProject, setActiveProject] = useState<string | null>(null);
   const [isGalleryActive, setIsGalleryActive] = useState(false);
 
+  // Смена жанра — сбрасываем секцию, проект и состояние галереи
   const toggleCategory = useCallback((category: Category) => {
     setActiveCategory((prev) => (prev === category ? null : category));
+    setActiveSection(null);
+    setActiveProject(null);
     setIsGalleryActive(false);
   }, []);
 
-  const activeImages = activeCategory ? getImagesByCategory(activeCategory) : [];
+  // Смена секции — сбрасываем выбранный проект
+  const toggleSection = useCallback((sectionId: string) => {
+    setActiveSection((prev) => (prev === sectionId ? null : sectionId));
+    setActiveProject(null);
+    setIsGalleryActive(false);
+  }, []);
+
+  const selectProject = useCallback((projectId: string) => {
+    setActiveProject(projectId);
+    setIsGalleryActive(false);
+  }, []);
+
+  // Секции текущего жанра (пусто → жанр без группировки)
+  const sectionsForCategory = activeCategory ? getSectionsByCategory(activeCategory) : [];
+  const hasSections = sectionsForCategory.length > 0;
+
+  // Какие фото показывать в галерее:
+  // - выбран проект → фото проекта
+  // - выбрано "Все" → все фото жанра
+  // - жанр без секций → все фото жанра сразу
+  const activeImages =
+    activeCategory && activeCategory !== "bio" && activeCategory !== "video"
+      ? activeProject === ALL_PROJECTS
+        ? getImagesByCategory(activeCategory)
+        : activeProject
+        ? getImagesByProject(activeProject)
+        : !hasSections
+        ? getImagesByCategory(activeCategory)
+        : []
+      : [];
 
   const getMenuItemOpacity = (categoryId: Category): number => {
     if (isGalleryActive) {
@@ -45,7 +94,7 @@ export default function Home() {
           }}
         >
           <Gallery
-            key={`desktop-${activeCategory}`}
+            key={`desktop-${activeCategory}-${activeProject}`}
             images={activeImages}
             onActiveChange={setIsGalleryActive}
           />
@@ -95,6 +144,66 @@ export default function Home() {
                     {category.title}
                   </span>
                 </button>
+
+                {/* Подменю секций и проектов (напр. Репортаж) */}
+                {isActive && hasSections && (
+                  <div
+                    className="py-3 pl-1 md:pl-2 transition-opacity duration-300 pointer-events-auto"
+                    style={{ opacity: isGalleryActive ? 0.2 : 1 }}
+                  >
+                    {sectionsForCategory.map((section) => {
+                      const sectionActive = activeSection === section.id;
+                      const sectionProjects = getProjectsBySection(section.id);
+
+                      return (
+                        <div key={section.id}>
+                          {/* Секция (2-й уровень) */}
+                          <button
+                            onClick={() => toggleSection(section.id)}
+                            className="block w-full text-left py-1 transition-opacity duration-200 cursor-pointer"
+                            style={{ opacity: sectionActive ? 1 : 0.5 }}
+                          >
+                            <span className="text-base md:text-lg font-light leading-snug">
+                              {section.title}
+                            </span>
+                          </button>
+
+                          {/* Проекты внутри секции (3-й уровень) */}
+                          {sectionActive && (
+                            <div className="pl-3 md:pl-4 pb-2">
+                              {sectionProjects.map((project) => {
+                                const projectActive = activeProject === project.id;
+                                return (
+                                  <button
+                                    key={project.id}
+                                    onClick={() => selectProject(project.id)}
+                                    className="block w-full text-left py-0.5 transition-opacity duration-200 cursor-pointer"
+                                    style={{ opacity: projectActive ? 1 : 0.4 }}
+                                  >
+                                    <span className="text-sm md:text-base font-light leading-snug">
+                                      {project.title}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Кнопка "Все фото" — неприметная, внизу списка */}
+                    <button
+                      onClick={() => selectProject(ALL_PROJECTS)}
+                      className="block w-full text-left pt-3 transition-opacity duration-200 cursor-pointer"
+                      style={{ opacity: activeProject === ALL_PROJECTS ? 0.8 : 0.25 }}
+                    >
+                      <span className="text-xs md:text-sm font-light tracking-widest uppercase">
+                        Все фото
+                      </span>
+                    </button>
+                  </div>
+                )}
 
                 {isActive && category.id === "bio" && (
                   <div
@@ -147,7 +256,7 @@ export default function Home() {
         {showPhotoGallery && (
           <div className="md:hidden mt-6 w-full" style={{ height: "60vh" }}>
             <Gallery
-              key={`mobile-${activeCategory}`}
+              key={`mobile-${activeCategory}-${activeProject}`}
               images={activeImages}
               onActiveChange={setIsGalleryActive}
             />
