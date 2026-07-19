@@ -4,11 +4,10 @@ import { reportageImages } from "./reportage.generated";
 // Реэкспорт типов — импорты из @/data/portfolio в компонентах не ломаются
 export type { Category, CategoryInfo, SectionInfo, ProjectInfo, PortfolioImage, PortfolioVideo, BioBrand } from "./portfolioTypes";
 
-// Категории для меню
+// Категории для меню.
+// product/portrait временно скрыты — реальных фото ещё нет (только репортаж и видео).
 export const categories: CategoryInfo[] = [
   { id: "reportage", title: "Репортаж" },
-  { id: "product", title: "Предметная съёмка" },
-  { id: "portrait", title: "Арт / Портрет" },
   { id: "video", title: "Видео" },
   { id: "bio", title: "Био" },
 ];
@@ -46,21 +45,7 @@ export const projects: ProjectInfo[] = [
   { id: "backstage-jughead",      title: "Jughead — мозг выкл", section: "backstage", category: "reportage" },
 ];
 
-// Placeholder до появления реальных фото
-const placeholderImages: PortfolioImage[] = [
-  { id: "p1", src: "https://placehold.co/800x800/1a1a1a/333333?text=P1", alt: "Предмет 1", category: "product", project: "product-misc", width: 800, height: 800 },
-  { id: "p2", src: "https://placehold.co/800x600/1a1a1a/333333?text=P2", alt: "Предмет 2", category: "product", project: "product-misc", width: 800, height: 600 },
-  { id: "p3", src: "https://placehold.co/600x800/1a1a1a/333333?text=P3", alt: "Предмет 3", category: "product", project: "product-misc", width: 600, height: 800 },
-  { id: "p4", src: "https://placehold.co/800x800/1a1a1a/333333?text=P4", alt: "Предмет 4", category: "product", project: "product-misc", width: 800, height: 800 },
-
-  { id: "a1", src: "https://placehold.co/600x900/1a1a1a/333333?text=A1", alt: "Портрет 1", category: "portrait", project: "portrait-misc", width: 600, height: 900 },
-  { id: "a2", src: "https://placehold.co/800x600/1a1a1a/333333?text=A2", alt: "Портрет 2", category: "portrait", project: "portrait-misc", width: 800, height: 600 },
-  { id: "a3", src: "https://placehold.co/600x800/1a1a1a/333333?text=A3", alt: "Портрет 3", category: "portrait", project: "portrait-misc", width: 600, height: 800 },
-  { id: "a4", src: "https://placehold.co/800x533/1a1a1a/333333?text=A4", alt: "Портрет 4", category: "portrait", project: "portrait-misc", width: 800, height: 533 },
-  { id: "a5", src: "https://placehold.co/600x900/1a1a1a/333333?text=A5", alt: "Портрет 5", category: "portrait", project: "portrait-misc", width: 600, height: 900 },
-];
-
-export const images: PortfolioImage[] = [...reportageImages, ...placeholderImages];
+export const images: PortfolioImage[] = [...reportageImages];
 
 export function getImagesByCategory(category: Category): PortfolioImage[] {
   return images.filter((img) => img.category === category);
