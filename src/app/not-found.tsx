@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { assetPath } from "@/lib/assetPath";
 
 export default function NotFound() {
   return (
@@ -7,9 +8,21 @@ export default function NotFound() {
         <span className="text-6xl md:text-7xl font-medium text-[var(--text)]">404</span>
         <span className="w-px h-12 md:h-14 bg-[var(--border)]" aria-hidden />
         <p className="text-lg md:text-xl text-[var(--text-muted)] max-w-xs">
-          Эта страница не найдена.
+          Эта страница улетела, как банан.
         </p>
       </div>
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={assetPath("/banana.png")}
+        alt="banana"
+        width={72}
+        height={72}
+        className="mt-10 opacity-80 select-none"
+        style={{ transform: "rotate(-8deg)" }}
+        draggable={false}
+      />
+
       <Link
         href="/"
         className="mt-8 text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"

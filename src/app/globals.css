@@ -97,6 +97,41 @@ a {
   animation: lightbox-enter 0.2s ease-out forwards;
 }
 
+/* ===== ПАСХАЛКА: дождь из бананов (Konami-код) ===== */
+.banana-rain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.banana-drop {
+  position: absolute;
+  top: -10vh;
+  will-change: transform, opacity;
+  animation-name: banana-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes banana-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(320deg);
+    opacity: 0;
+  }
+}
+
 /* Filmstrip: градиентная маска — соседние кадры плавно уходят в белый фон */
 .filmstrip-mask {
   -webkit-mask-image: linear-gradient(
