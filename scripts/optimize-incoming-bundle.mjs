@@ -24,6 +24,36 @@ const OUTPUT_BASE = join(ROOT, "public", "photos");
 /** Порядок верхних папок внутри бандла (важен для последовательности в галерее) */
 const TOP_ORDER = ["Никола-Ленивец", "Мероприятия", "Бэкстейдж"];
 
+/** Верхняя папка → section id (совпадает с sections[] в portfolio.ts) */
+const SECTION_BY_TOP = {
+  "Никола-Ленивец": "nikola-lenivets",
+  "Мероприятия": "events",
+  "Бэкстейдж": "backstage",
+};
+
+/** Имя подпапки → project id (совпадает с projects[] в portfolio.ts).
+ *  Ключи — русские названия папок, поэтому маппинг явный, а не транслитерация. */
+const PROJECT_BY_SUBFOLDER = {
+  // Никола-Ленивец
+  "2023": "nikola-lenivets-2023",
+  "2024": "nikola-lenivets-2024",
+  "2025": "nikola-lenivets-2025",
+  "Масленица": "nikola-lenivets-maslenitsa",
+  // Мероприятия
+  "4 ceramics": "events-4-ceramics",
+  "Выставка от обьединения Septemas": "events-septemas",
+  "Презентация машины Omoda": "events-omoda",
+  "Сила ветра & Билайн": "events-sila-vetra",
+  "Фестиваль Крутояк": "events-krutoyak",
+  "Lupine": "events-lupine",
+  "Streetbeat": "events-streetbeat",
+  // Бэкстейдж
+  "Подкаст Solomon Talks": "backstage-solomon-talks",
+  "Проект На шуме": "backstage-na-shume",
+  "Яндекс диск": "backstage-yandex-disk",
+  "Jughead - мозг выкл": "backstage-jughead",
+};
+
 async function walkImages(dir, acc = []) {
   let entries;
   try {
@@ -47,6 +77,20 @@ function altFromPath(absPath) {
   const rel = relative(BUNDLE, dirname(absPath));
   const normalized = rel.split(sep).filter(Boolean).join(" — ");
   return normalized ? `Репортаж — ${normalized}` : "Репортаж";
+}
+
+/** project id из пути к файлу: верхняя папка → section, подпапка → project.
+ *  Файлы прямо в верхней папке (без подпапки) идут в "<section>-other". */
+function projectFromPath(absPath) {
+  const rel = relative(BUNDLE, dirname(absPath));
+  // macOS хранит имена в NFD (напр. "й" = "и" + ◌̆). Нормализуем в NFC,
+  // иначе ключи маппинга (NFC) не совпадут по байтам с именами папок.
+  const parts = rel.split(sep).map((p) => p.normalize("NFC")).filter(Boolean);
+  const [top, sub] = parts;
+  const section = SECTION_BY_TOP[top];
+  if (!section) return "misc";
+  if (!sub) return `${section}-other`;
+  return PROJECT_BY_SUBFOLDER[sub] ?? `${section}-other`;
 }
 
 async function collectOrderedFiles() {
@@ -104,9 +148,10 @@ async function main() {
 
     const { width, height, sizeKb } = await optimizeFile(inPath, outPath);
     const alt = altFromPath(inPath);
+    const project = projectFromPath(inPath);
     const id = `r${idx}`;
 
-    entries.push({ id, src: `/photos/${category}/${outName}`, alt, category, width, height });
+    entries.push({ id, src: `/photos/${category}/${outName}`, alt, project, category, width, height });
     console.log(`  ✓ ${relative(ROOT, inPath)} → ${outName} (${width}×${height}, ${sizeKb}KB)`);
   }
 
@@ -123,7 +168,7 @@ async function main() {
 
   for (const e of entries) {
     tsLines.push(
-      `  { id: "${e.id}", src: "${e.src}", alt: "${escapeTsString(e.alt)}", category: "reportage", width: ${e.width}, height: ${e.height} },`
+      `  { id: "${e.id}", src: "${e.src}", alt: "${escapeTsString(e.alt)}", category: "reportage", project: "${e.project}", width: ${e.width}, height: ${e.height} },`
     );
   }
 
