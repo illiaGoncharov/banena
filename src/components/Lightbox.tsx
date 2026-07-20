@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { createPortal } from "react-dom";
 import type { PortfolioImage } from "@/data/portfolio";
 import { assetPath } from "@/lib/assetPath";
 import { useSwipe } from "@/lib/useSwipe";
@@ -15,6 +16,8 @@ interface LightboxProps {
 export function Lightbox({ images, currentIndex, onIndexChange, onClose }: LightboxProps) {
   const total = images.length;
   const [loaded, setLoaded] = useState(false);
+  // Портал монтируем только на клиенте — до этого document.body недоступен
+  const [mounted, setMounted] = useState(false);
 
   const goNext = useCallback(() => {
     setLoaded(false);
@@ -30,6 +33,10 @@ export function Lightbox({ images, currentIndex, onIndexChange, onClose }: Light
     onSwipeLeft: goNext,
     onSwipeRight: goPrev,
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Блокируем скролл body и ловим клавиши
   useEffect(() => {
@@ -63,7 +70,10 @@ export function Lightbox({ images, currentIndex, onIndexChange, onClose }: Light
 
   const current = images[currentIndex];
 
-  return (
+  // Не рендерим на сервере/до маунта — document.body ещё недоступен
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       ref={swipeRef}
       className="fixed inset-0 z-50 flex items-center justify-center lightbox-enter"
@@ -79,7 +89,7 @@ export function Lightbox({ images, currentIndex, onIndexChange, onClose }: Light
         ✕
       </button>
 
-      {/* Фото */}
+      {/* Фото — небольшой сдвиг влево от центра */}
       <img
         src={assetPath(current.src)}
         alt={current.alt}
@@ -87,6 +97,7 @@ export function Lightbox({ images, currentIndex, onIndexChange, onClose }: Light
         style={{
           opacity: loaded ? 1 : 0,
           transition: "opacity 200ms ease",
+          transform: "translateX(-3vw)",
         }}
         draggable={false}
         onClick={(e) => e.stopPropagation()}
@@ -116,6 +127,7 @@ export function Lightbox({ images, currentIndex, onIndexChange, onClose }: Light
       >
         {String(currentIndex + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

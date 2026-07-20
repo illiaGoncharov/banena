@@ -160,21 +160,25 @@ export function GalleryFilmstrip({
           );
         })}
 
-        {/* Зоны клика: левая половина → назад, правая → вперёд */}
+        {/* Зоны клика выровнены по границам слайдов (CENTER_L/SLIDE_W),
+            иначе край центрального фото попадал в зону goNext/goPrev */}
         <button
           onClick={goPrev}
-          className="absolute left-0 top-0 bottom-0 w-1/4 cursor-w-resize z-10"
+          style={{ width: `${CENTER_L}%` }}
+          className="absolute left-0 top-0 bottom-0 cursor-w-resize z-10"
           aria-label="Предыдущее фото"
         />
         {/* Центральная зона — клик по текущему фото → lightbox */}
         <button
           onClick={onOpenLightbox}
-          className="absolute left-1/4 top-0 bottom-0 w-1/2 cursor-zoom-in z-10"
+          style={{ width: `${SLIDE_W}%`, left: `${CENTER_L}%` }}
+          className="absolute top-0 bottom-0 cursor-zoom-in z-10"
           aria-label="Открыть фото крупно"
         />
         <button
           onClick={goNext}
-          className="absolute right-0 top-0 bottom-0 w-1/4 cursor-e-resize z-10"
+          style={{ width: `${CENTER_L}%` }}
+          className="absolute right-0 top-0 bottom-0 cursor-e-resize z-10"
           aria-label="Следующее фото"
         />
       </div>

@@ -9,6 +9,7 @@ import {
   getSectionsByCategory,
   getProjectsBySection,
   getImagesByProject,
+  getImagesBySection,
   videos,
   bioSchool,
   bioBrands,
@@ -50,9 +51,14 @@ export default function Home() {
   const sectionsForCategory = activeCategory ? getSectionsByCategory(activeCategory) : [];
   const hasSections = sectionsForCategory.length > 0;
 
+  // Секция без под-проектов (напр. "Бэкстейдж") — фото показываются
+  // сразу по клику на секцию, без промежуточного меню проектов.
+  const sectionHasProjects = activeSection ? getProjectsBySection(activeSection).length > 0 : false;
+
   // Какие фото показывать в галерее:
   // - выбран проект → фото проекта
   // - выбрано "Все" → все фото жанра
+  // - выбрана секция без проектов → все фото секции сразу
   // - жанр без секций → все фото жанра сразу
   const activeImages =
     activeCategory && activeCategory !== "bio" && activeCategory !== "video"
@@ -60,6 +66,8 @@ export default function Home() {
         ? getImagesByCategory(activeCategory)
         : activeProject
         ? getImagesByProject(activeProject)
+        : activeSection && !sectionHasProjects
+        ? getImagesBySection(activeSection)
         : !hasSections
         ? getImagesByCategory(activeCategory)
         : []
@@ -94,7 +102,7 @@ export default function Home() {
           }}
         >
           <Gallery
-            key={`desktop-${activeCategory}-${activeProject}`}
+            key={`desktop-${activeCategory}-${activeSection}-${activeProject}`}
             images={activeImages}
             onActiveChange={setIsGalleryActive}
           />
@@ -137,7 +145,7 @@ export default function Home() {
               <div key={category.id}>
                 <button
                   onClick={() => toggleCategory(category.id)}
-                  className="block w-full text-left py-0 transition-opacity duration-300 cursor-pointer pointer-events-auto"
+                  className="block w-fit text-left py-0 transition-opacity duration-300 cursor-pointer pointer-events-auto"
                   style={{ opacity }}
                 >
                   <span className="text-2xl md:text-4xl lg:text-5xl font-normal leading-none">
@@ -148,7 +156,7 @@ export default function Home() {
                 {/* Подменю секций и проектов (напр. Репортаж) */}
                 {isActive && hasSections && (
                   <div
-                    className="py-3 pl-1 md:pl-2 transition-opacity duration-300 pointer-events-auto"
+                    className="py-3 pl-1 md:pl-2 transition-opacity duration-300"
                     style={{ opacity: isGalleryActive ? 0.2 : 1 }}
                   >
                     {sectionsForCategory.map((section) => {
@@ -160,7 +168,7 @@ export default function Home() {
                           {/* Секция (2-й уровень) */}
                           <button
                             onClick={() => toggleSection(section.id)}
-                            className="block w-full text-left py-1 transition-opacity duration-200 cursor-pointer"
+                            className="block w-fit text-left py-1 transition-opacity duration-200 cursor-pointer pointer-events-auto"
                             style={{ opacity: sectionActive ? 1 : 0.5 }}
                           >
                             <span className="text-base md:text-lg font-light leading-snug">
@@ -168,8 +176,10 @@ export default function Home() {
                             </span>
                           </button>
 
-                          {/* Проекты внутри секции (3-й уровень) */}
-                          {sectionActive && (
+                          {/* Проекты внутри секции (3-й уровень).
+                              Если у секции нет проектов (напр. "Бэкстейдж"),
+                              подсписок не рендерим — фото уже показаны по клику на секцию. */}
+                          {sectionActive && sectionProjects.length > 0 && (
                             <div className="pl-3 md:pl-4 pb-2">
                               {sectionProjects.map((project) => {
                                 const projectActive = activeProject === project.id;
@@ -177,7 +187,7 @@ export default function Home() {
                                   <button
                                     key={project.id}
                                     onClick={() => selectProject(project.id)}
-                                    className="block w-full text-left py-0.5 transition-opacity duration-200 cursor-pointer"
+                                    className="block w-fit text-left py-0.5 transition-opacity duration-200 cursor-pointer pointer-events-auto"
                                     style={{ opacity: projectActive ? 1 : 0.4 }}
                                   >
                                     <span className="text-sm md:text-base font-light leading-snug">
@@ -195,7 +205,7 @@ export default function Home() {
                     {/* Кнопка "Все фото" — неприметная, внизу списка */}
                     <button
                       onClick={() => selectProject(ALL_PROJECTS)}
-                      className="block w-full text-left pt-3 transition-opacity duration-200 cursor-pointer"
+                      className="block w-fit text-left pt-3 transition-opacity duration-200 cursor-pointer pointer-events-auto"
                       style={{ opacity: activeProject === ALL_PROJECTS ? 0.8 : 0.25 }}
                     >
                       <span className="text-xs md:text-sm font-light tracking-widest uppercase">
@@ -256,7 +266,7 @@ export default function Home() {
         {showPhotoGallery && (
           <div className="md:hidden mt-6 w-full" style={{ height: "60vh" }}>
             <Gallery
-              key={`mobile-${activeCategory}-${activeProject}`}
+              key={`mobile-${activeCategory}-${activeSection}-${activeProject}`}
               images={activeImages}
               onActiveChange={setIsGalleryActive}
             />
