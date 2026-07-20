@@ -38,11 +38,7 @@ export const projects: ProjectInfo[] = [
   { id: "events-lupine",      title: "Lupine",                  section: "events", category: "reportage" },
   { id: "events-streetbeat",  title: "Streetbeat",              section: "events", category: "reportage" },
 
-  // Бэкстейдж
-  { id: "backstage-solomon-talks", title: "Solomon Talks",      section: "backstage", category: "reportage" },
-  { id: "backstage-na-shume",     title: "На шуме",             section: "backstage", category: "reportage" },
-  { id: "backstage-yandex-disk",  title: "Яндекс диск",        section: "backstage", category: "reportage" },
-  { id: "backstage-jughead",      title: "Jughead — мозг выкл", section: "backstage", category: "reportage" },
+  // Бэкстейдж — без под-проектов, единая лента (см. getImagesBySection)
 ];
 
 export const images: PortfolioImage[] = [...reportageImages];
@@ -61,6 +57,12 @@ export function getProjectsBySection(sectionId: string): ProjectInfo[] {
 
 export function getImagesByProject(projectId: string): PortfolioImage[] {
   return images.filter((img) => img.project === projectId);
+}
+
+// Для секций без под-проектов (напр. "Бэкстейдж") — фото лежат прямо
+// под project === section.id, единой лентой без разбивки на альбомы.
+export function getImagesBySection(sectionId: string): PortfolioImage[] {
+  return images.filter((img) => img.project === sectionId);
 }
 
 // Видео с YouTube

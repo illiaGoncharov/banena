@@ -8,7 +8,7 @@
  *   category по умолчанию: reportage
  */
 
-import { readdir, mkdir, writeFile } from "node:fs/promises";
+import { readdir, mkdir, writeFile, rm } from "node:fs/promises";
 import { join, relative, dirname, extname, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
@@ -32,7 +32,9 @@ const SECTION_BY_TOP = {
 };
 
 /** Имя подпапки → project id (совпадает с projects[] в portfolio.ts).
- *  Ключи — русские названия папок, поэтому маппинг явный, а не транслитерация. */
+ *  Ключи — русские названия папок, поэтому маппинг явный, а не транслитерация.
+ *  Бэкстейдж сюда не входит — там все подпапки сливаются в один общий проект
+ *  "backstage" (см. projectFromPath), без разбивки по под-проектам. */
 const PROJECT_BY_SUBFOLDER = {
   // Никола-Ленивец
   "2023": "nikola-lenivets-2023",
@@ -47,12 +49,17 @@ const PROJECT_BY_SUBFOLDER = {
   "Фестиваль Крутояк": "events-krutoyak",
   "Lupine": "events-lupine",
   "Streetbeat": "events-streetbeat",
-  // Бэкстейдж
-  "Подкаст Solomon Talks": "backstage-solomon-talks",
-  "Проект На шуме": "backstage-na-shume",
-  "Яндекс диск": "backstage-yandex-disk",
-  "Jughead - мозг выкл": "backstage-jughead",
 };
+
+/** Бэкстейдж — общая лента без под-проектов: по BACKSTAGE_LIMIT фото
+ *  из каждой подпапки, в этом фиксированном порядке (не алфавитном). */
+const BACKSTAGE_LIMIT = 2;
+const BACKSTAGE_SUBFOLDER_ORDER = [
+  "Подкаст Solomon Talks",
+  "Проект На шуме",
+  "Яндекс диск",
+  "Jughead - мозг выкл",
+];
 
 async function walkImages(dir, acc = []) {
   let entries;
@@ -80,7 +87,8 @@ function altFromPath(absPath) {
 }
 
 /** project id из пути к файлу: верхняя папка → section, подпапка → project.
- *  Файлы прямо в верхней папке (без подпапки) идут в "<section>-other". */
+ *  Файлы прямо в верхней папке (без подпапки) идут в "<section>-other".
+ *  Бэкстейдж — особый случай: все подпапки сливаются в один "backstage". */
 function projectFromPath(absPath) {
   const rel = relative(BUNDLE, dirname(absPath));
   // macOS хранит имена в NFD (напр. "й" = "и" + ◌̆). Нормализуем в NFC,
@@ -89,14 +97,42 @@ function projectFromPath(absPath) {
   const [top, sub] = parts;
   const section = SECTION_BY_TOP[top];
   if (!section) return "misc";
+  if (section === "backstage") return "backstage";
   if (!sub) return `${section}-other`;
   return PROJECT_BY_SUBFOLDER[sub] ?? `${section}-other`;
+}
+
+/** Бэкстейдж: по BACKSTAGE_LIMIT первых (по имени файла) фото из каждой
+ *  подпапки, в фиксированном порядке BACKSTAGE_SUBFOLDER_ORDER — чтобы
+ *  в общей ленте кадры шли группами по проекту в заданной последовательности. */
+async function collectBackstageFiles(root) {
+  const files = [];
+  for (const subfolder of BACKSTAGE_SUBFOLDER_ORDER) {
+    const dir = join(root, subfolder);
+    let entries;
+    try {
+      entries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    const picked = entries
+      .filter((ent) => ent.isFile() && ALLOWED_EXT.has(extname(ent.name).toLowerCase()))
+      .map((ent) => ent.name)
+      .sort((a, b) => a.localeCompare(b, "ru"))
+      .slice(0, BACKSTAGE_LIMIT);
+    files.push(...picked.map((name) => join(dir, name)));
+  }
+  return files;
 }
 
 async function collectOrderedFiles() {
   const all = [];
   for (const top of TOP_ORDER) {
     const root = join(BUNDLE, top);
+    if (top === "Бэкстейдж") {
+      all.push(...(await collectBackstageFiles(root)));
+      continue;
+    }
     const files = await walkImages(root);
     files.sort((a, b) => a.localeCompare(b, "ru"));
     all.push(...files);
@@ -134,6 +170,9 @@ async function main() {
     process.exit(1);
   }
 
+  // Чистим старые webp перед пересборкой — иначе при уменьшении числа
+  // кадров (напр. слияние бэкстейджа) в папке остаются "осиротевшие" файлы.
+  await rm(outDir, { recursive: true, force: true });
   await mkdir(outDir, { recursive: true });
 
   console.log(`\n📸 ${category}: ${files.length} файлов из бандла\n`);
