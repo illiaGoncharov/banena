@@ -11,7 +11,7 @@ const ibmPlex = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://illiagoncharov.github.io/banena"),
+  metadataBase: new URL("https://banena.ru"),
   title: "BANENA — Фотограф, Москва",
   description: "Фотограф из Москвы. Репортаж, предметная съёмка, арт-портрет, видео.",
   keywords: ["фотограф", "Москва", "репортаж", "предметная съёмка", "портрет", "BANENA"],
