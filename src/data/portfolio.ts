@@ -1,18 +1,23 @@
 import type { Category, CategoryInfo, SectionInfo, ProjectInfo, PortfolioImage, PortfolioVideo, BioBrand } from "./portfolioTypes";
 import { reportageImages } from "./reportage.generated";
+import { portraitImages } from "./portrait.generated";
+import { productImages } from "./product.generated";
 
 // Реэкспорт типов — импорты из @/data/portfolio в компонентах не ломаются
 export type { Category, CategoryInfo, SectionInfo, ProjectInfo, PortfolioImage, PortfolioVideo, BioBrand } from "./portfolioTypes";
 
 // Категории для меню.
-// product/portrait временно скрыты — реальных фото ещё нет (только репортаж и видео).
 export const categories: CategoryInfo[] = [
   { id: "reportage", title: "Репортаж" },
+  { id: "portrait", title: "Портрет" },
+  { id: "product", title: "Предметная" },
   { id: "video", title: "Видео" },
   { id: "bio", title: "Био" },
 ];
 
-// Секции внутри категорий (верхний уровень группировки)
+// Секции внутри категорий (верхний уровень группировки).
+// У Портрета/Предметной секций нет — там папка (человек/бренд) это сразу
+// проект, без промежуточного уровня (см. getProjectsByCategory + page.tsx).
 export const sections: SectionInfo[] = [
   // Репортаж
   { id: "nikola-lenivets",  title: "Никола-Ленивец",  category: "reportage" },
@@ -20,13 +25,17 @@ export const sections: SectionInfo[] = [
   { id: "backstage",        title: "Бэкстейдж",       category: "reportage" },
 ];
 
-// Проекты внутри секций
+// Проекты внутри секций (для Репортажа) или напрямую внутри категории
+// (для Портрета/Предметной — там `section` техническое, совпадает с category
+// и не соответствует записи в sections[], поэтому getSectionsByCategory для
+// них вернёт пусто, а getProjectsByCategory отдаст проекты напрямую).
 export const projects: ProjectInfo[] = [
   // Никола-Ленивец
-  { id: "nikola-lenivets-2023",       title: "2023",       section: "nikola-lenivets", category: "reportage" },
-  { id: "nikola-lenivets-2024",       title: "2024",       section: "nikola-lenivets", category: "reportage" },
-  { id: "nikola-lenivets-2025",       title: "2025",       section: "nikola-lenivets", category: "reportage" },
-  { id: "nikola-lenivets-maslenitsa", title: "Масленица",  section: "nikola-lenivets", category: "reportage" },
+  { id: "nikola-lenivets-2023",            title: "2023",            section: "nikola-lenivets", category: "reportage" },
+  { id: "nikola-lenivets-2024",            title: "2024",            section: "nikola-lenivets", category: "reportage" },
+  { id: "nikola-lenivets-2025",            title: "2025",            section: "nikola-lenivets", category: "reportage" },
+  { id: "nikola-lenivets-maslenitsa-2024", title: "Масленица 2024",  section: "nikola-lenivets", category: "reportage" },
+  { id: "nikola-lenivets-maslenitsa-2026", title: "Масленица 2026",  section: "nikola-lenivets", category: "reportage" },
 
   // Мероприятия
   { id: "events-4-ceramics",  title: "4 ceramics",              section: "events", category: "reportage" },
@@ -38,9 +47,28 @@ export const projects: ProjectInfo[] = [
   { id: "events-streetbeat",  title: "Streetbeat",              section: "events", category: "reportage" },
 
   // Бэкстейдж — без под-проектов, единая лента (см. getImagesBySection)
+
+  // Портрет (папки = проекты напрямую, без секции)
+  { id: "portrait-anita",            title: "Анита",            section: "portrait", category: "portrait" },
+  { id: "portrait-anya",             title: "Аня",              section: "portrait", category: "portrait" },
+  { id: "portrait-ilya",             title: "Илья",             section: "portrait", category: "portrait" },
+  { id: "portrait-liza",             title: "Лиза",             section: "portrait", category: "portrait" },
+  { id: "portrait-leyla",            title: "Лэйла",            section: "portrait", category: "portrait" },
+  { id: "portrait-nastya-inversion", title: "Настя инверсия",   section: "portrait", category: "portrait" },
+  { id: "portrait-shura-sasha",      title: "Шура и Саша",      section: "portrait", category: "portrait" },
+  { id: "portrait-various",          title: "Разные",           section: "portrait", category: "portrait" },
+
+  // Предметная (папки = проекты напрямую, без секции)
+  { id: "product-carely",     title: "Carely",           section: "product", category: "product" },
+  { id: "product-navjwlry",   title: "Nav.jwlry",        section: "product", category: "product" },
+  { id: "product-otomoshi",   title: "Otomoshi",         section: "product", category: "product" },
+  { id: "product-partisan",   title: "Мебель Partisan",  section: "product", category: "product" },
+  { id: "product-white-bg",   title: "На белом фоне",    section: "product", category: "product" },
+  { id: "product-anya-bags",  title: "Сумки Anya",       section: "product", category: "product" },
+  { id: "product-misc",       title: "Разное",           section: "product", category: "product" },
 ];
 
-export const images: PortfolioImage[] = [...reportageImages];
+export const images: PortfolioImage[] = [...reportageImages, ...portraitImages, ...productImages];
 
 export function getImagesByCategory(category: Category): PortfolioImage[] {
   return images.filter((img) => img.category === category);
@@ -52,6 +80,12 @@ export function getSectionsByCategory(category: Category): SectionInfo[] {
 
 export function getProjectsBySection(sectionId: string): ProjectInfo[] {
   return projects.filter((p) => p.section === sectionId);
+}
+
+// Для категорий без секций (Портрет, Предметная) — проекты
+// достаются напрямую по category, без промежуточного клика на "раздел".
+export function getProjectsByCategory(category: Category): ProjectInfo[] {
+  return projects.filter((p) => p.category === category);
 }
 
 export function getImagesByProject(projectId: string): PortfolioImage[] {

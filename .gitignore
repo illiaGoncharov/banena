@@ -42,3 +42,6 @@ next-env.d.ts
 
 # raw photos before optimization
 /_incoming/
+
+# local notes, not part of the project deliverable
+/IDEAS.md

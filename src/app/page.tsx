@@ -8,6 +8,7 @@ import {
   getImagesByCategory,
   getSectionsByCategory,
   getProjectsBySection,
+  getProjectsByCategory,
   getImagesByProject,
   getImagesBySection,
   videos,
@@ -50,6 +51,10 @@ export default function Home() {
   // Секции текущего жанра (пусто → жанр без группировки)
   const sectionsForCategory = activeCategory ? getSectionsByCategory(activeCategory) : [];
   const hasSections = sectionsForCategory.length > 0;
+
+  // Жанры без секций, но с проектами напрямую (Портрет, Предметная) —
+  // папка (человек/бренд) это сразу проект, промежуточный "раздел" не нужен.
+  const flatProjects = activeCategory && !hasSections ? getProjectsByCategory(activeCategory) : [];
 
   // Секция без под-проектов (напр. "Бэкстейдж") — фото показываются
   // сразу по клику на секцию, без промежуточного меню проектов.
@@ -199,6 +204,42 @@ export default function Home() {
                             </div>
                           )}
                         </div>
+                      );
+                    })}
+
+                    {/* Кнопка "Все фото" — неприметная, внизу списка */}
+                    <button
+                      onClick={() => selectProject(ALL_PROJECTS)}
+                      className="block w-fit text-left pt-3 transition-opacity duration-200 cursor-pointer pointer-events-auto"
+                      style={{ opacity: activeProject === ALL_PROJECTS ? 0.8 : 0.25 }}
+                    >
+                      <span className="text-xs md:text-sm font-light tracking-widest uppercase">
+                        Все фото
+                      </span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Плоский список проектов (напр. Портрет, Предметная) —
+                    без промежуточного "раздела", папка = проект напрямую. */}
+                {isActive && !hasSections && flatProjects.length > 0 && (
+                  <div
+                    className="py-3 pl-1 md:pl-2 transition-opacity duration-300"
+                    style={{ opacity: isGalleryActive ? 0.2 : 1 }}
+                  >
+                    {flatProjects.map((project) => {
+                      const projectActive = activeProject === project.id;
+                      return (
+                        <button
+                          key={project.id}
+                          onClick={() => selectProject(project.id)}
+                          className="block w-fit text-left py-1 transition-opacity duration-200 cursor-pointer pointer-events-auto"
+                          style={{ opacity: projectActive ? 1 : 0.5 }}
+                        >
+                          <span className="text-base md:text-lg font-light leading-snug">
+                            {project.title}
+                          </span>
+                        </button>
                       );
                     })}
 

@@ -1,11 +1,13 @@
 /**
- * Импорт фотографий из _incoming/ФОТКИ ДЛЯ САЙТА/<раздел>/ (рекурсивно)
- * → public/photos/<category>/NNN.webp + генерация src/data/reportage.generated.ts
+ * Импорт фотографий из _incoming/<бандл категории>/ (рекурсивно)
+ * → public/photos/<category>/NNN.webp + генерация src/data/<category>.generated.ts
  *
- * Порядок разделов в галерее: Никола-Ленивец → Мероприятия → Бэкстейдж
+ * Репортаж (nested) — 2 уровня: раздел (Никола-Ленивец/Мероприятия/Бэкстейдж) → проект.
+ * Портрет/Предметка (flat) — 1 уровень: подпапка = проект напрямую.
  *
  * Использование: node scripts/optimize-incoming-bundle.mjs [category]
  *   category по умолчанию: reportage
+ *   доступные: reportage, portrait, product
  */
 
 import { readdir, mkdir, writeFile, rm } from "node:fs/promises";
@@ -18,8 +20,15 @@ const QUALITY = 82;
 const ALLOWED_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".tiff", ".tif"]);
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const BUNDLE = join(ROOT, "_incoming", "ФОТКИ ДЛЯ САЙТА");
+const INCOMING = join(ROOT, "_incoming");
 const OUTPUT_BASE = join(ROOT, "public", "photos");
+const DATA_DIR = join(ROOT, "src", "data");
+
+// ============================================================
+// Репортаж — nested-бандл (раздел → проект)
+// ============================================================
+
+const REPORTAGE_BUNDLE = join(INCOMING, "ФОТКИ ДЛЯ САЙТА");
 
 /** Порядок верхних папок внутри бандла (важен для последовательности в галерее) */
 const TOP_ORDER = ["Никола-Ленивец", "Мероприятия", "Бэкстейдж"];
@@ -33,14 +42,13 @@ const SECTION_BY_TOP = {
 
 /** Имя подпапки → project id (совпадает с projects[] в portfolio.ts).
  *  Ключи — русские названия папок, поэтому маппинг явный, а не транслитерация.
- *  Бэкстейдж сюда не входит — там все подпапки сливаются в один общий проект
- *  "backstage" (см. projectFromPath), без разбивки по под-проектам. */
+ *  Масленица сюда не входит — у неё свои подпапки-годы (см. projectFromPath).
+ *  Бэкстейдж сюда не входит — это плоская лента без под-проектов. */
 const PROJECT_BY_SUBFOLDER = {
   // Никола-Ленивец
   "2023": "nikola-lenivets-2023",
   "2024": "nikola-lenivets-2024",
   "2025": "nikola-lenivets-2025",
-  "Масленица": "nikola-lenivets-maslenitsa",
   // Мероприятия
   "4 ceramics": "events-4-ceramics",
   "Выставка от обьединения Septemas": "events-septemas",
@@ -50,16 +58,6 @@ const PROJECT_BY_SUBFOLDER = {
   "Lupine": "events-lupine",
   "Streetbeat": "events-streetbeat",
 };
-
-/** Бэкстейдж — общая лента без под-проектов: по BACKSTAGE_LIMIT фото
- *  из каждой подпапки, в этом фиксированном порядке (не алфавитном). */
-const BACKSTAGE_LIMIT = 2;
-const BACKSTAGE_SUBFOLDER_ORDER = [
-  "Подкаст Solomon Talks",
-  "Проект На шуме",
-  "Яндекс диск",
-  "Jughead - мозг выкл",
-];
 
 async function walkImages(dir, acc = []) {
   let entries;
@@ -81,54 +79,49 @@ async function walkImages(dir, acc = []) {
 
 /** Человекочитаемый alt: «Репортаж — …» из пути относительно бандла */
 function altFromPath(absPath) {
-  const rel = relative(BUNDLE, dirname(absPath));
+  const rel = relative(REPORTAGE_BUNDLE, dirname(absPath));
   const normalized = rel.split(sep).filter(Boolean).join(" — ");
   return normalized ? `Репортаж — ${normalized}` : "Репортаж";
 }
 
 /** project id из пути к файлу: верхняя папка → section, подпапка → project.
- *  Файлы прямо в верхней папке (без подпапки) идут в "<section>-other".
- *  Бэкстейдж — особый случай: все подпапки сливаются в один "backstage". */
+ *  Масленица — особый случай: под-подпапка-год даёт отдельный проект
+ *  (nikola-lenivets-maslenitsa-2024/2026), т.к. на новом диске так разложено.
+ *  Бэкстейдж — особый случай: плоская лента, все файлы в одном "backstage". */
 function projectFromPath(absPath) {
-  const rel = relative(BUNDLE, dirname(absPath));
+  const rel = relative(REPORTAGE_BUNDLE, dirname(absPath));
   // macOS хранит имена в NFD (напр. "й" = "и" + ◌̆). Нормализуем в NFC,
   // иначе ключи маппинга (NFC) не совпадут по байтам с именами папок.
   const parts = rel.split(sep).map((p) => p.normalize("NFC")).filter(Boolean);
-  const [top, sub] = parts;
+  const [top, sub, subsub] = parts;
   const section = SECTION_BY_TOP[top];
   if (!section) return "misc";
   if (section === "backstage") return "backstage";
   if (!sub) return `${section}-other`;
+  if (sub === "Масленица" && subsub) return `nikola-lenivets-maslenitsa-${subsub}`;
   return PROJECT_BY_SUBFOLDER[sub] ?? `${section}-other`;
 }
 
-/** Бэкстейдж: по BACKSTAGE_LIMIT первых (по имени файла) фото из каждой
- *  подпапки, в фиксированном порядке BACKSTAGE_SUBFOLDER_ORDER — чтобы
- *  в общей ленте кадры шли группами по проекту в заданной последовательности. */
+/** Бэкстейдж — плоская лента: все файлы прямо из папки "Бэкстейдж",
+ *  без под-проектов (подпапок в новой раскладке диска больше нет). */
 async function collectBackstageFiles(root) {
-  const files = [];
-  for (const subfolder of BACKSTAGE_SUBFOLDER_ORDER) {
-    const dir = join(root, subfolder);
-    let entries;
-    try {
-      entries = await readdir(dir, { withFileTypes: true });
-    } catch {
-      continue;
-    }
-    const picked = entries
-      .filter((ent) => ent.isFile() && ALLOWED_EXT.has(extname(ent.name).toLowerCase()))
-      .map((ent) => ent.name)
-      .sort((a, b) => a.localeCompare(b, "ru"))
-      .slice(0, BACKSTAGE_LIMIT);
-    files.push(...picked.map((name) => join(dir, name)));
+  let entries;
+  try {
+    entries = await readdir(root, { withFileTypes: true });
+  } catch {
+    return [];
   }
-  return files;
+  return entries
+    .filter((ent) => ent.isFile() && ALLOWED_EXT.has(extname(ent.name).toLowerCase()))
+    .map((ent) => ent.name)
+    .sort((a, b) => a.localeCompare(b, "ru"))
+    .map((name) => join(root, name));
 }
 
-async function collectOrderedFiles() {
+async function collectReportageFiles() {
   const all = [];
   for (const top of TOP_ORDER) {
-    const root = join(BUNDLE, top);
+    const root = join(REPORTAGE_BUNDLE, top);
     if (top === "Бэкстейдж") {
       all.push(...(await collectBackstageFiles(root)));
       continue;
@@ -139,6 +132,147 @@ async function collectOrderedFiles() {
   }
   return all;
 }
+
+async function processReportage() {
+  const category = "reportage";
+  const outDir = join(OUTPUT_BASE, category);
+
+  const files = await collectReportageFiles();
+  if (files.length === 0) {
+    console.error("Нет изображений в", REPORTAGE_BUNDLE);
+    console.error("Ожидаются папки:", TOP_ORDER.join(", "));
+    process.exit(1);
+  }
+
+  await rm(outDir, { recursive: true, force: true });
+  await mkdir(outDir, { recursive: true });
+
+  console.log(`\n📸 ${category}: ${files.length} файлов из бандла\n`);
+
+  const entries = [];
+  for (let i = 0; i < files.length; i++) {
+    const inPath = files[i];
+    const idx = String(i + 1).padStart(3, "0");
+    const outName = `${idx}.webp`;
+    const outPath = join(outDir, outName);
+
+    const { width, height, sizeKb } = await optimizeFile(inPath, outPath);
+    const entry = {
+      id: `r${idx}`,
+      src: `/photos/${category}/${outName}`,
+      alt: altFromPath(inPath),
+      project: projectFromPath(inPath),
+      category,
+      width,
+      height,
+    };
+    entries.push(entry);
+    console.log(`  ✓ ${relative(ROOT, inPath)} → ${outName} (${width}×${height}, ${sizeKb}KB)`);
+  }
+
+  await writeGeneratedFile("reportage", "reportageImages", entries);
+}
+
+// ============================================================
+// Портрет / Предметка — flat-бандл (подпапка = проект напрямую)
+// ============================================================
+
+/** category → { bundleDir (папка в _incoming/), altPrefix, projectOrder }
+ *  projectOrder — [имя подпапки на диске, project id] в порядке отображения
+ *  в галерее (совпадает с projects[] в portfolio.ts). "Разное"/"Разные"
+ *  (смешанные кадры) — специально в конце, как общий "прочее"-раздел. */
+const FLAT_CATEGORIES = {
+  portrait: {
+    bundleDir: "Люди",
+    altPrefix: "Портрет",
+    idPrefix: "pt",
+    projectOrder: [
+      ["Анита", "portrait-anita"],
+      ["Аня", "portrait-anya"],
+      ["Илья", "portrait-ilya"],
+      ["Лиза", "portrait-liza"],
+      ["Лэйла", "portrait-leyla"],
+      ["Настя инверсия", "portrait-nastya-inversion"],
+      ["Шура и Саша", "portrait-shura-sasha"],
+      ["Разные", "portrait-various"],
+    ],
+  },
+  product: {
+    bundleDir: "Предметка",
+    altPrefix: "Предметная",
+    idPrefix: "pd",
+    projectOrder: [
+      ["Carely", "product-carely"],
+      ["Nav.jwlry", "product-navjwlry"],
+      ["Otomoshi", "product-otomoshi"],
+      ["Мебель Partisan", "product-partisan"],
+      ["На белом фоне", "product-white-bg"],
+      ["Сумки Anya", "product-anya-bags"],
+      ["Разное", "product-misc"],
+    ],
+  },
+};
+
+async function processFlatCategory(category) {
+  const config = FLAT_CATEGORIES[category];
+  const bundleRoot = join(INCOMING, config.bundleDir);
+  const outDir = join(OUTPUT_BASE, category);
+
+  await rm(outDir, { recursive: true, force: true });
+  await mkdir(outDir, { recursive: true });
+
+  const entries = [];
+  let i = 0;
+
+  for (const [subfolder, projectId] of config.projectOrder) {
+    const dir = join(bundleRoot, subfolder);
+    let dirEntries;
+    try {
+      dirEntries = await readdir(dir, { withFileTypes: true });
+    } catch {
+      console.log(`  ⏭  "${subfolder}" не найдена в _incoming/${config.bundleDir}/, пропускаю`);
+      continue;
+    }
+
+    const files = dirEntries
+      .filter((ent) => ent.isFile() && ALLOWED_EXT.has(extname(ent.name).toLowerCase()))
+      .map((ent) => ent.name)
+      .sort((a, b) => a.localeCompare(b, "ru"));
+
+    for (const file of files) {
+      i++;
+      const idx = String(i).padStart(3, "0");
+      const outName = `${idx}.webp`;
+      const inPath = join(dir, file);
+      const outPath = join(outDir, outName);
+
+      const { width, height, sizeKb } = await optimizeFile(inPath, outPath);
+      const entry = {
+        id: `${config.idPrefix}${idx}`,
+        src: `/photos/${category}/${outName}`,
+        alt: `${config.altPrefix} — ${subfolder}`,
+        project: projectId,
+        category,
+        width,
+        height,
+      };
+      entries.push(entry);
+      console.log(`  ✓ ${relative(ROOT, inPath)} → ${outName} (${width}×${height}, ${sizeKb}KB)`);
+    }
+  }
+
+  if (entries.length === 0) {
+    console.error(`Нет изображений в _incoming/${config.bundleDir}/`);
+    process.exit(1);
+  }
+
+  console.log(`\n📸 ${category}: ${entries.length} файлов из бандла\n`);
+  await writeGeneratedFile(category, `${category}Images`, entries);
+}
+
+// ============================================================
+// Общее
+// ============================================================
 
 async function optimizeFile(inPath, outPath) {
   const image = sharp(inPath);
@@ -159,65 +293,45 @@ function escapeTsString(s) {
   return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, " ");
 }
 
-async function main() {
-  const category = process.argv[2] ?? "reportage";
-  const outDir = join(OUTPUT_BASE, category);
-
-  const files = await collectOrderedFiles();
-  if (files.length === 0) {
-    console.error("Нет изображений в", BUNDLE);
-    console.error("Ожидаются папки:", TOP_ORDER.join(", "));
-    process.exit(1);
-  }
-
-  // Чистим старые webp перед пересборкой — иначе при уменьшении числа
-  // кадров (напр. слияние бэкстейджа) в папке остаются "осиротевшие" файлы.
-  await rm(outDir, { recursive: true, force: true });
-  await mkdir(outDir, { recursive: true });
-
-  console.log(`\n📸 ${category}: ${files.length} файлов из бандла\n`);
-
-  const entries = [];
-
-  for (let i = 0; i < files.length; i++) {
-    const inPath = files[i];
-    const idx = String(i + 1).padStart(3, "0");
-    const outName = `${idx}.webp`;
-    const outPath = join(outDir, outName);
-
-    const { width, height, sizeKb } = await optimizeFile(inPath, outPath);
-    const alt = altFromPath(inPath);
-    const project = projectFromPath(inPath);
-    const id = `r${idx}`;
-
-    entries.push({ id, src: `/photos/${category}/${outName}`, alt, project, category, width, height });
-    console.log(`  ✓ ${relative(ROOT, inPath)} → ${outName} (${width}×${height}, ${sizeKb}KB)`);
-  }
-
+async function writeGeneratedFile(category, exportName, entries) {
   const tsLines = [
     "/**",
-    " * Автогенерация: node scripts/optimize-incoming-bundle.mjs",
+    " * Автогенерация: node scripts/optimize-incoming-bundle.mjs " + category,
     " * Не править вручную — перезапусти скрипт после смены исходников.",
     " */",
     "",
     'import type { PortfolioImage } from "./portfolioTypes";',
     "",
-    "export const reportageImages: PortfolioImage[] = [",
+    `export const ${exportName}: PortfolioImage[] = [`,
   ];
 
   for (const e of entries) {
     tsLines.push(
-      `  { id: "${e.id}", src: "${e.src}", alt: "${escapeTsString(e.alt)}", category: "reportage", project: "${e.project}", width: ${e.width}, height: ${e.height} },`
+      `  { id: "${e.id}", src: "${e.src}", alt: "${escapeTsString(e.alt)}", category: "${category}", project: "${e.project}", width: ${e.width}, height: ${e.height} },`
     );
   }
 
   tsLines.push("];", "");
 
-  const outTs = join(ROOT, "src", "data", "reportage.generated.ts");
+  const outTs = join(DATA_DIR, `${category}.generated.ts`);
   await writeFile(outTs, tsLines.join("\n"), "utf8");
 
   console.log(`\n✅ Записано: ${relative(ROOT, outTs)}`);
-  console.log(`✅ WebP: ${relative(ROOT, outDir)}/ (${entries.length} файлов)\n`);
+  console.log(`✅ WebP: ${relative(ROOT, join(OUTPUT_BASE, category))}/ (${entries.length} файлов)\n`);
+}
+
+async function main() {
+  const category = process.argv[2] ?? "reportage";
+
+  if (category === "reportage") {
+    await processReportage();
+  } else if (category in FLAT_CATEGORIES) {
+    await processFlatCategory(category);
+  } else {
+    console.error(`Неизвестная категория: ${category}`);
+    console.error("Доступные: reportage, portrait, product");
+    process.exit(1);
+  }
 }
 
 main().catch((err) => {
