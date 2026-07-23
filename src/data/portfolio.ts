@@ -27,7 +27,6 @@ export const projects: ProjectInfo[] = [
   { id: "nikola-lenivets-2024",       title: "2024",       section: "nikola-lenivets", category: "reportage" },
   { id: "nikola-lenivets-2025",       title: "2025",       section: "nikola-lenivets", category: "reportage" },
   { id: "nikola-lenivets-maslenitsa", title: "Масленица",  section: "nikola-lenivets", category: "reportage" },
-  { id: "nikola-lenivets-other",      title: "Разное",     section: "nikola-lenivets", category: "reportage" },
 
   // Мероприятия
   { id: "events-4-ceramics",  title: "4 ceramics",              section: "events", category: "reportage" },

@@ -67,8 +67,6 @@ export const reportageImages: PortfolioImage[] = [
   { id: "r059", src: "/photos/reportage/059.webp", alt: "Репортаж — Никола-Ленивец — Масленица", category: "reportage", project: "nikola-lenivets-maslenitsa", width: 1920, height: 1280 },
   { id: "r060", src: "/photos/reportage/060.webp", alt: "Репортаж — Никола-Ленивец — Масленица", category: "reportage", project: "nikola-lenivets-maslenitsa", width: 1920, height: 1280 },
   { id: "r061", src: "/photos/reportage/061.webp", alt: "Репортаж — Никола-Ленивец — Масленица", category: "reportage", project: "nikola-lenivets-maslenitsa", width: 1920, height: 1280 },
-  { id: "r062", src: "/photos/reportage/062.webp", alt: "Репортаж — Никола-Ленивец", category: "reportage", project: "nikola-lenivets-other", width: 1920, height: 1080 },
-  { id: "r063", src: "/photos/reportage/063.webp", alt: "Репортаж — Никола-Ленивец", category: "reportage", project: "nikola-lenivets-other", width: 1920, height: 1080 },
   { id: "r064", src: "/photos/reportage/064.webp", alt: "Репортаж — Мероприятия — 4 ceramics", category: "reportage", project: "events-4-ceramics", width: 1280, height: 1920 },
   { id: "r065", src: "/photos/reportage/065.webp", alt: "Репортаж — Мероприятия — 4 ceramics", category: "reportage", project: "events-4-ceramics", width: 1280, height: 1920 },
   { id: "r066", src: "/photos/reportage/066.webp", alt: "Репортаж — Мероприятия — 4 ceramics", category: "reportage", project: "events-4-ceramics", width: 1280, height: 1920 },
