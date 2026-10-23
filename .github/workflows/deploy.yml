@@ -1,21 +1,16 @@
-name: Deploy to GitHub Pages
+name: Deploy to hosting
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: "pages"
+  group: "deploy-hosting"
   cancel-in-progress: false
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,19 +28,25 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./out
+      # Secrets: FTP_HOST, FTP_USER, FTP_PASSWORD, FTP_REMOTE_DIR
+      # Optional: FTP_PORT (default 21), FTP_SSL=1 for FTPS
+      - name: Install lftp
+        if: ${{ secrets.FTP_HOST != '' }}
+        run: sudo apt-get update && sudo apt-get install -y lftp
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy via FTP
+        if: ${{ secrets.FTP_HOST != '' }}
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_REMOTE_DIR: ${{ secrets.FTP_REMOTE_DIR }}
+          FTP_PORT: ${{ secrets.FTP_PORT }}
+          FTP_SSL: ${{ secrets.FTP_SSL }}
+        run: bash scripts/deploy-hosting.sh
 
+      - name: Skip deploy (secrets missing)
+        if: ${{ secrets.FTP_HOST == '' }}
+        run: |
+          echo "::warning::FTP_HOST secret is not set. Build OK, deploy skipped."
+          echo "Add repo secrets: FTP_HOST, FTP_USER, FTP_PASSWORD, FTP_REMOTE_DIR"

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "cf:tweak": "node scripts/cloudflare-ru-fix.mjs tweak",
+    "cf:point-dns": "node scripts/cloudflare-ru-fix.mjs point-dns",
+    "deploy:hosting": "bash scripts/deploy-hosting.sh"
   },
   "dependencies": {
     "next": "^14.2.35",

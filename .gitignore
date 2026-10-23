@@ -45,3 +45,6 @@ next-env.d.ts
 
 # local notes, not part of the project deliverable
 /IDEAS.md
+
+# local deploy secrets
+deploy.env
