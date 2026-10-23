@@ -322,8 +322,9 @@ export default function Home() {
       </main>
 
       {/* Футер — фиксированный слева внизу */}
+      {/* z-20 + pointer-events-auto: main перекрывает viewport (z-10); без этого футер не кликается, особенно на mobile */}
       <footer
-        className="fixed bottom-6 left-5 md:bottom-8 md:left-16 lg:left-20 flex gap-6 text-sm transition-opacity duration-300"
+        className="fixed bottom-6 left-5 md:bottom-8 md:left-16 lg:left-20 z-20 flex gap-6 text-sm transition-opacity duration-300 pointer-events-auto"
         style={{
           opacity: isGalleryActive ? 0.15 : activeCategory ? 0.4 : 0.5,
         }}
