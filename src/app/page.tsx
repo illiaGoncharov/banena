@@ -321,10 +321,9 @@ export default function Home() {
         )}
       </main>
 
-      {/* Футер — фиксированный слева внизу */}
-      {/* z-20 + pointer-events-auto: main перекрывает viewport (z-10); без этого футер не кликается, особенно на mobile */}
+      {/* Футер: на mobile — максимальный слой под лайтбоксом (z-50); main с z-10 перехватывал тапы */}
       <footer
-        className="fixed bottom-6 left-5 md:bottom-8 md:left-16 lg:left-20 z-20 flex gap-6 text-sm transition-opacity duration-300 pointer-events-auto"
+        className="fixed bottom-6 left-5 md:bottom-8 md:left-16 lg:left-20 isolate z-20 max-md:z-[49] flex gap-4 text-sm transition-opacity duration-300 pointer-events-auto max-md:pb-[env(safe-area-inset-bottom)]"
         style={{
           opacity: isGalleryActive ? 0.15 : activeCategory ? 0.4 : 0.5,
         }}
@@ -333,7 +332,7 @@ export default function Home() {
           href={contacts.telegram}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:opacity-100 transition-opacity text-neutral-500"
+          className="py-3 pr-1 hover:opacity-100 transition-opacity text-neutral-500"
         >
           TG
         </a>
@@ -341,13 +340,13 @@ export default function Home() {
           href={contacts.instagram}
           target="_blank"
           rel="noopener noreferrer"
-          className="hover:opacity-100 transition-opacity text-neutral-500"
+          className="py-3 pr-1 hover:opacity-100 transition-opacity text-neutral-500"
         >
           INST
         </a>
         <a
           href={`mailto:${contacts.email}`}
-          className="hover:opacity-100 transition-opacity text-neutral-500"
+          className="py-3 pr-1 hover:opacity-100 transition-opacity text-neutral-500"
         >
           MAIL
         </a>
